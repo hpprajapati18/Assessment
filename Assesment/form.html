@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Complaint - Hashcrypt</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-image: url('every-detail-of-a-sleek-modern-car-captured-in-close-up-photo.jpg');
+background-size: cover; background-attachment: fixed; background-repeat: no-repeat;">
+
+  <header class="header">
+    <h1>Hashcrypt Technologies Pvt. Ltd.</h1>
+  </header>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Hashcrypt</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="form.html">Submit Complaint</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mt-4">
+    <h2 class="text-center mb-4">Customer Complaint Form</h2>
+
+    <form id="complaintForm" class="p-4 border rounded bg-light">
+      <div class="mb-3">
+        <label for="name" class="form-label">Full Name</label>
+        <input type="text" id="name" class="form-control" placeholder="Enter your name">
+        <small class="text-danger" id="nameError"></small>
+      </div>
+
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone</label>
+        <input type="text" id="phone" class="form-control" placeholder="Enter 10-digit phone number">
+        <small class="text-danger" id="phoneError"></small>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="text" id="email" class="form-control" placeholder="Enter valid email">
+        <small class="text-danger" id="emailError"></small>
+      </div>
+
+      <div class="mb-3">
+        <label for="vehicle" class="form-label">Vehicle Model</label>
+        <select id="vehicle" class="form-select">
+          <option value="">Select your vehicle</option>
+          <option>Tata Nexon</option>
+          <option>Hyundai Creta</option>
+          <option>Maruti Swift</option>
+          <option>Mahindra XUV 700</option>
+        </select>
+        <small class="text-danger" id="vehicleError"></small>
+      </div>
+
+      <div class="mb-3">
+        <label for="complaint" class="form-label">Complaint Details</label>
+        <textarea id="complaint" class="form-control" rows="3" placeholder="Describe your issue"></textarea>
+        <small class="text-danger" id="complaintError"></small>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+      </div>
+
+      <p id="successMsg" class="text-success text-center mt-3"></p>
+    </form>
+  </main>
+
+  <footer class="footer bg-dark text-light text-center p-3 mt-4">
+    <p>&copy; 2025 Hashcrypt Technologies Pvt. Ltd.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
