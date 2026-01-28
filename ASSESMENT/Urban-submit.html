@@ -1,0 +1,333 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UrbanGreentech — Submit Plant Report</title>
+  <style>
+  *{
+    box-sizing:border-box;
+    margin: 0;
+    padding: 0;
+   }
+    body{
+        font-family:Inter,Segoe UI,Arial;
+        margin:0;
+        background:var(--bg);
+        color:#0b1320;
+        padding:16px;
+    }
+    .container{
+        max-width:900px;
+        margin:24px auto;
+        padding:20px;
+        background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent);
+        border-radius:12px;
+    }
+    header{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:10px;
+    }
+    h1{
+        font-size:20px;
+        margin:0;
+    }
+    .controls{
+        display:flex;
+        gap:8px;
+        align-items:center;
+    }
+    .btn{
+        padding:8px 12px;
+        border-radius:8px;
+        border:1px solid rgba(11,19,32,0.08);
+        background:var(--card);
+        cursor:pointer;
+    }
+
+    form{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+    }
+    label{
+        font-size:13px;
+        color:var(--muted);
+        display:block;
+        margin-bottom:6px;
+    }
+    input[type="text"], input[type="number"], input[type="date"], textarea, select{
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(11,19,32,0.08);
+      font-size:14px;
+      background:var(--card);
+    }
+    textarea{
+        min-height:120px;
+        resize:vertical;
+    }
+    .full{
+        grid-column:1/-1;
+    }
+    .right{
+        justify-self:end;
+    }
+
+    .msg{
+        padding:10px;
+        border-radius:8px;
+        margin-bottom:12px; 
+        display:none;
+    }
+    .msg.success{
+        background:rgba(42,143,107,0.12);
+        border:1px solid rgba(42,143,107,0.18);
+        color:var(--success);
+    }
+    .msg.error{
+        background:rgba(194,48,48,0.08);
+        border:1px solid rgba(194,48,48,0.12);
+        color:var(--error);
+    }
+
+    @media (max-width:640px){
+      form{
+        grid-template-columns:1fr;
+    }
+      .right{
+        justify-self:stretch;
+    }
+    }
+
+    .hint{
+        font-size:12px;
+        color:var(--muted);
+        margin-top:6px;
+    }
+    .field-error{
+        border-color:var(--error)!important;
+    }
+    .small{
+        font-size:12px;
+        color:var(--muted);
+    }
+
+    footer{
+        font-size:13px;
+        color:var(--muted);
+        margin-top:14px;
+        display:flex;
+        justify-content:space-between;
+    }
+    a.link{
+        color:inherit;
+        text-decoration:underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <header>
+      <h1>UrbanGreentech — Submit Plant Care Report</h1>
+      <div class="controls">
+        <button id="themeToggle" class="btn" aria-pressed="false">Toggle Theme</button>
+        <a class="btn" href="Urban-view.html">View Submissions</a>
+      </div>
+    </header>
+
+    <div id="message" class="msg" role="status" aria-live="polite"></div>
+
+    <form id="plantForm" novalidate>
+      <div>
+        <label for="plantName">Plant Name</label>
+        <input id="plantName" name="plantName" type="text" required minlength="3" placeholder="e.g., Spider Plant" />
+        <div class="hint">At least 3 characters</div>
+      </div>
+
+      <div>
+        <label for="location">Location in Home</label>
+        <select id="location" name="location" required>
+          <option value="">-- select --</option>
+          <option>Balcony</option>
+          <option>Bedroom</option>
+          <option>Kitchen</option>
+          <option>Living Room</option>
+          <option>Office</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="frequency">Watering Frequency (days)</label>
+        <input id="frequency" name="frequency" type="number" min="1" required placeholder="e.g., 7" />
+        <div class="hint">Number &gt; 0</div>
+      </div>
+
+      <div>
+        <label for="lastWatered">Last Watered (date)</label>
+        <input id="lastWatered" name="lastWatered" type="date" required />
+        <div class="hint">Choose a past date (not future)</div>
+      </div>
+
+      <div class="full">
+        <label for="notes">Plant Condition Notes</label>
+        <textarea id="notes" name="notes" minlength="15" required placeholder="Describe pests, yellowing, droopiness, etc. Minimum 15 characters"></textarea>
+      </div>
+
+      <div class="full" style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" id="clearBtn" class="btn">Clear</button>
+        <button type="submit" class="btn" id="submitBtn">Submit Report</button>
+      </div>
+    </form>
+
+    <footer>
+      <div class="small">Data stored locally in your browser (localStorage)</div>
+      <div class="small">UrbanGreentech — Demo</div>
+    </footer>
+  </div>
+
+  <script type="module">
+    class PlantReportHandler{
+      constructor(root){
+        this.root = root;
+        this.form = root.querySelector('#plantForm');
+        this.messageBox = root.querySelector('#message');
+        this.themeToggle = root.querySelector('#themeToggle');
+        this.storageKey = 'plantReports';
+        this._bindEvents();
+        this._initTheme();
+      }
+
+      _bindEvents(){
+        // event delegation: single listener on form container 
+
+        this.root.addEventListener('input', (e)=> this._onInput(e));
+        this.root.addEventListener('blur', (e)=> this._onInput(e), true);
+        this.form.addEventListener('submit', e=> this._onSubmit(e));
+        this.root.querySelector('#clearBtn').addEventListener('click', ()=> this.clearForm());
+        this.themeToggle.addEventListener('click', ()=> this._toggleTheme());
+      }
+
+      _initTheme(){
+        const theme = localStorage.getItem('ug_theme');
+        if(theme) document.documentElement.setAttribute('data-theme', theme);
+      }
+
+      _toggleTheme(){
+        const cur = document.documentElement.getAttribute('data-theme');
+        const next = cur === 'dark' ? '' : 'dark';
+        if(next) document.documentElement.setAttribute('data-theme', next); else document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('ug_theme', next || 'light');
+      }
+
+      _onInput(e){
+        const field = e.target.closest('input, textarea, select');
+        if(!field) return;
+        // real-time validate single field
+        this._validateField(field);
+      }
+
+      _validateField(field){
+        const name = field.name;
+        const val = field.value.trim();
+        field.classList.remove('field-error');
+        let valid = true;
+
+        if(!val){ valid=false; }
+        else{
+          if(name==='plantName' && val.length < 3) valid = false;
+          if(name==='frequency' && !(Number(val) > 0)) valid = false;
+          if(name==='lastWatered'){
+            const d = new Date(val); const now = new Date();
+            if(!(d instanceof Date) || isNaN(d)) valid=false;
+            else if(d > now) valid=false;
+          }
+          if(name==='notes' && val.length < 15) valid = false;
+        }
+
+        if(!valid){ field.classList.add('field-error'); }
+        return valid;
+      }
+
+      validateForm(data){
+        const errors = [];
+        if(!data.plantName || data.plantName.trim().length < 3) errors.push('Plant name must be at least 3 characters');
+        if(!(Number(data.frequency) > 0)) errors.push('Frequency must be a number > 0');
+        const d = new Date(data.lastWatered);
+        if(!data.lastWatered || isNaN(d) || d > new Date()) errors.push('Last watered must be a valid past date');
+        if(!data.notes || data.notes.trim().length < 15) errors.push('Notes must be at least 15 characters');
+        return errors;
+      }
+
+      saveToLocalStorage(item){
+        const arr = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+        arr.push(item);
+        localStorage.setItem(this.storageKey, JSON.stringify(arr));
+      }
+
+      clearForm(){
+        this.form.reset();
+        // remove any error styles
+        this.form.querySelectorAll('.field-error').forEach(n=> n.classList.remove('field-error'));
+        this.showMessage('Form cleared', 'success');
+      }
+
+      showMessage(text, type='success'){
+        this.messageBox.textContent = text; this.messageBox.className = 'msg '+(type==='error'?'error':'success');
+        this.messageBox.style.display = 'block';
+        setTimeout(()=>{ this.messageBox.style.display = 'none'; }, 3000);
+      }
+
+      _onSubmit(e){
+        e.preventDefault();
+        const formData = new FormData(this.form);
+        const data = Object.fromEntries(formData.entries());
+        // sanitize/trim
+        for(const k in data) data[k] = data[k].trim();
+
+        const errors = this.validateForm(data);
+        if(errors.length){
+          this.showMessage(errors.join('. '), 'error');
+          // highlight bad fields
+          const fields = ['plantName','frequency','lastWatered','notes'];
+          fields.forEach(f=> this.form.querySelector(`[name="${f}"]`).classList.remove('field-error'));
+          if(errors.length) {
+            // naive highlight by re-validating
+            this.form.querySelectorAll('input,textarea,select').forEach(n=> this._validateField(n));
+          }
+          return;
+        }
+
+        const record = {
+          id: Date.now().toString(36),
+          plantName: data.plantName,
+          location: data.location,
+          frequency: Number(data.frequency),
+          lastWatered: data.lastWatered,
+          notes: data.notes,
+          createdAt: new Date().toISOString()
+        };
+
+        try{
+          this.saveToLocalStorage(record);
+          this.showMessage('Report saved locally ✅', 'success');
+          this.clearForm();
+        }catch(err){
+          console.error(err);
+          this.showMessage('Failed to save report', 'error');
+        }
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', ()=>{
+      new PlantReportHandler(document.getElementById('app'));
+    });
+  </script>
+
+</body>
+</html>
